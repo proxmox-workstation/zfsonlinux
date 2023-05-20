@@ -80,5 +80,6 @@ clean:
 distclean: clean
 
 .PHONY: upload
+upload: UPLOAD_DIST ?= $(DEB_DISTRIBUTION)
 upload: $(DEBS)
-	tar -cf - $(DEBS) | ssh repoman@repo.proxmox.com -- upload --product pve,pmg,pbs --dist bullseye --arch amd64
+	tar -cf - $(DEBS) | ssh repoman@repo.proxmox.com -- upload --product pve,pmg,pbs --dist $(UPLOAD_DIST) --arch $(DEB_HOST_ARCH)
