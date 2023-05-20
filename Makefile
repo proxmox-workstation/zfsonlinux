@@ -65,6 +65,9 @@ $(ZFS_DSC): $(ZFSDIR) $(ORIG_SRC_TAR)
 	cd $(ZFSDIR); dpkg-buildpackage -S -uc -us -d
 	lintian $@
 
+sbuild: $(ZFS_DSC)
+	sbuild $(ZFS_DSC)
+
 $(ZFSDIR): $(ZFSSRC)/README.md $(ZFSSRC) debian
 	rm -rf $(ZFSDIR) $(ZFSDIR).tmp
 	cp -a $(ZFSSRC) $(ZFSDIR).tmp
