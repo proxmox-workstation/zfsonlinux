@@ -38,7 +38,7 @@ dsc: ${ZFS_DSC}
 
 # called from pve-kernel's Makefile to get patched sources
 .PHONY: kernel
-kernel: dsc
+kernel: $(ZFS_DSC)
 	dpkg-source -x ${ZFS_DSC} ../pkg-zfs
 	${MAKE} -C ../pkg-zfs -f debian/rules adapt_meta_file
 
