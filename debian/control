@@ -203,7 +203,7 @@ Package: zfsutils-linux
 Section: contrib/admin
 Architecture: linux-any
 Depends: python3, ${misc:Depends}, ${python3:Depends}, ${shlibs:Depends}
-Recommends: lsb-base, zfs-zed
+Recommends: zfs-zed
 Suggests: nfs-kernel-server,
           samba-common-bin (>= 3.0.23),
           zfs-initramfs
