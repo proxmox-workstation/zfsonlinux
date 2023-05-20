@@ -3,6 +3,7 @@ include /usr/share/dpkg/default.mk
 
 ZFSDIR=zfs-linux_$(DEB_VERSION_UPSTREAM)
 ZFSSRC=upstream
+ORIG_SRC_TAR=$(ZFSDIR).orig.tar.gz
 
 ZFS_DEB1= libnvpair3linux_$(DEB_VERSION)_amd64.deb
 
@@ -56,7 +57,10 @@ $(ZFS_DEB1): $(ZFSDIR)
 	cd $(ZFSDIR); dpkg-buildpackage -b -uc -us
 	lintian $(DEBS)
 
-$(ZFS_DSC): $(ZFSDIR)
+$(ORIG_SRC_TAR): $(ZFSDIR)
+	tar czf $(ORIG_SRC_TAR) --exclude="$(ZFSDIR)/debian" $(ZFSDIR)
+
+$(ZFS_DSC): $(ZFSDIR) $(ORIG_SRC_TAR)
 	tar czf zfs-linux_$(ZFSVER).orig.tar.gz $(ZFSDIR)
 	cd $(ZFSDIR); dpkg-buildpackage -S -uc -us -d
 	lintian $@
@@ -70,7 +74,7 @@ $(ZFSDIR): $(ZFSSRC)/README.md $(ZFSSRC) debian
 
 .PHONY: clean
 clean: 	
-	rm -rf *~ *.deb *.changes *.buildinfo *.dsc *.orig.tar.* *.debian.tar.* $(ZFSDIR)
+	rm -rf *~ *.deb *.changes *.buildinfo *.build *.dsc *.orig.tar.* *.debian.tar.* $(ZFSDIR)
 
 .PHONY: distclean
 distclean: clean
