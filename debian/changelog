@@ -1,3 +1,11 @@
+zfs-linux (2.1.12-pve1) bookworm; urgency=medium
+
+  * update ZFS to 2.1.12
+
+  * zfs trim: avoid exit-failure if last pool isn't nvme-only
+
+ -- Proxmox Support Team <support@proxmox.com>  Tue, 13 Jun 2023 15:25:16 +0200
+
 zfs-linux (2.1.11-pve2) bookworm; urgency=medium
 
   * re-build for Debian 12 Bookworm based releases
