@@ -17,10 +17,10 @@ Signed-off-by: Thomas Lamprecht <t.lamprecht@proxmox.com>
  1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/cmd/zed/zed.d/Makefile.am b/cmd/zed/zed.d/Makefile.am
-index 2c8173b3e..ad39292e4 100644
+index 1905a9207..6dc06252a 100644
 --- a/cmd/zed/zed.d/Makefile.am
 +++ b/cmd/zed/zed.d/Makefile.am
-@@ -49,7 +49,7 @@ install-data-hook:
+@@ -51,7 +51,7 @@ install-data-hook:
  	for f in $(zedconfdefaults); do \
  	  test -f "$(DESTDIR)$(zedconfdir)/$${f}" -o \
  	       -L "$(DESTDIR)$(zedconfdir)/$${f}" || \
