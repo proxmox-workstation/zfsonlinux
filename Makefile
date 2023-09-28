@@ -1,9 +1,11 @@
 include /usr/share/dpkg/default.mk
 # source form https://github.com/zfsonlinux/
 
-ZFSDIR=zfs-linux_$(DEB_VERSION_UPSTREAM)
-ZFSSRC=upstream
-ORIG_SRC_TAR=$(ZFSDIR).orig.tar.gz
+PACKAGE = zfs-linux
+
+SRCDIR = upstream
+BUILDDIR ?= $(PACKAGE)-$(DEB_VERSION_UPSTREAM)
+ORIG_SRC_TAR = $(PACKAGE)_$(DEB_VERSION_UPSTREAM).orig.tar.gz
 
 ZFS_DEB1= libnvpair3linux_$(DEB_VERSION)_amd64.deb
 
@@ -47,33 +49,32 @@ dinstall: $(DEBS)
 
 .PHONY: submodule
 submodule:
-	test -f "$(ZFSSRC)/README.md" || git submodule update --init
-$(ZFSSRC)/README.md: submodule
+	test -f "$(SRCDIR)/README.md" || git submodule update --init
+
+$(SRCDIR)/README.md: submodule
 
 .PHONY: zfs
 zfs: $(DEBS)
 $(ZFS_DEB2) $(ZFS_DBG_DEBS): $(ZFS_DEB1)
-$(ZFS_DEB1): $(ZFSDIR)
-	cd $(ZFSDIR); dpkg-buildpackage -b -uc -us
+$(ZFS_DEB1): $(BUILDDIR)
+	cd $(BUILDDIR); dpkg-buildpackage -b -uc -us
 	lintian $(DEBS)
 
-$(ORIG_SRC_TAR): $(ZFSDIR)
-	tar czf $(ORIG_SRC_TAR) --exclude="$(ZFSDIR)/debian" $(ZFSDIR)
+$(ORIG_SRC_TAR): $(BUILDDIR)
+	tar czf $(ORIG_SRC_TAR) --exclude="$(BUILDDIR)/debian" $(BUILDDIR)
 
-$(ZFS_DSC): $(ZFSDIR) $(ORIG_SRC_TAR)
-	tar czf zfs-linux_$(ZFSVER).orig.tar.gz $(ZFSDIR)
-	cd $(ZFSDIR); dpkg-buildpackage -S -uc -us -d
+$(ZFS_DSC): $(BUILDDIR) $(ORIG_SRC_TAR)
+	cd $(BUILDDIR); dpkg-buildpackage -S -uc -us -d
 	lintian $@
 
 sbuild: $(ZFS_DSC)
 	sbuild $(ZFS_DSC)
 
-$(ZFSDIR): $(ZFSSRC)/README.md $(ZFSSRC) debian
-	rm -rf $(ZFSDIR) $(ZFSDIR).tmp
-	cp -a $(ZFSSRC) $(ZFSDIR).tmp
-	cp -a debian $(ZFSDIR).tmp/debian
-	mv $(ZFSDIR).tmp $(ZFSDIR)
-
+$(BUILDDIR): $(SRCDIR)/README.md $(SRCDIR) debian
+	rm -rf $@ $@.tmp
+	cp -a $(SRCDIR) $@.tmp
+	cp -a debian $@.tmp/debian
+	mv $@.tmp $@
 
 .PHONY: clean
 clean: 	
