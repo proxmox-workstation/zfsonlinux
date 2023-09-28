@@ -32,10 +32,14 @@ DEBS= $(ZFS_DEB1) $(ZFS_DEB2) $(ZFS_DBG_DEBS)
 ZFS_DSC = zfs-linux_$(DEB_VERSION).dsc
 
 all: deb
-.PHONY: deb
+
+.PHONY: deb dsc
 deb: $(DEBS)
-.PHONY: dsc
-dsc: $(ZFS_DSC)
+
+dsc:
+	rm -rf *.dsc $(BUILDDIR)
+	$(MAKE) $(ZFS_DSC)
+	lintian $(ZFS_DSC)
 
 # called from pve-kernel's Makefile to get patched sources
 .PHONY: kernel
@@ -65,7 +69,6 @@ $(ORIG_SRC_TAR): $(BUILDDIR)
 
 $(ZFS_DSC): $(BUILDDIR) $(ORIG_SRC_TAR)
 	cd $(BUILDDIR); dpkg-buildpackage -S -uc -us -d
-	lintian $@
 
 sbuild: $(ZFS_DSC)
 	sbuild $(ZFS_DSC)
