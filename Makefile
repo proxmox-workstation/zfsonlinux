@@ -81,7 +81,8 @@ $(BUILDDIR): $(SRCDIR)/README.md $(SRCDIR) debian
 
 .PHONY: clean
 clean: 	
-	rm -rf *~ *.deb *.changes *.buildinfo *.build *.dsc *.orig.tar.* *.debian.tar.* $(ZFSDIR)
+	rm -rf $(PACKAGE)-[0-9]*/
+	rm -f *~ *.deb *.changes *.buildinfo *.build *.dsc *.orig.tar.* *.debian.tar.*
 
 .PHONY: distclean
 distclean: clean
