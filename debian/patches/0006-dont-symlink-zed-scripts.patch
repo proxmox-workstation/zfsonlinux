@@ -3,14 +3,29 @@ From: Antonio Russo <antonio.e.russo@gmail.com>
 Date: Fri, 20 Mar 2020 17:28:43 +0100
 Subject: [PATCH] dont symlink zed scripts
 
-(cherry picked and adapted from 5cee380324d74e640d5dd7a360faba3994c8007f [0])
+Of the zedlet scripts shipped by upstream, a subset are enabled by
+default, by creating symlinks in /etc/zfs/zed.d.  These symlinks are
+shipped in the zfs-zed package.  dpkg, however, does not support
+conffile handling of symlinks, and therefore any changes (removals) to
+the symlinks are not preserved on package upgrade.
 
-[0] https://salsa.debian.org/zfsonlinux-team/zfs.git
+To address this policy violation, we:
 
-Signed-off-by: Stoiko Ivanov <s.ivanov@proxmox.com>
+ 1. During package build, create a list of enabled-by-default zedlets,
+    instead of creating symlinks.
+ 2. On package removal, identify all enabled-by-default zedlets whose
+    symlinks do not exist (i.e., were removed by the user). This is done
+    by creating "whiteout" links to /dev/null in their place).
+ 3. On package installation, create links to enabled-by-default zedlets
+    UNLESS there is already a file there (i.e., abort if there is a
+    whiteout link).
+ 4. We also clean up broken symlinks to removed zedlets at package
+    postinst.
 
 Description: track default symlinks, instead of symlinking
 Forwarded: no need
+(cherry picked from https://salsa.debian.org/zfsonlinux-team/zfs/-/commit/5cee380324d7)
+Signed-off-by: Stoiko Ivanov <s.ivanov@proxmox.com>
 Signed-off-by: Thomas Lamprecht <t.lamprecht@proxmox.com>
 ---
  cmd/zed/zed.d/Makefile.am | 2 +-
