@@ -1,3 +1,18 @@
+zfs-linux (2.2.0-pve1) bookworm; urgency=medium
+
+  * update ZFS to 2.2.0
+
+  * zfsutils-linux:
+    - install new systemd units to trim a pool periodically
+    - ship new `zilstat` binary
+    - and new man pages for zfs lock, zfs unlock and vdev properties
+    - remove man pages for zfs jail and zfs unjail, those are for FreeBSD only
+      and the respective commands where never exposed for Linux
+
+  * fix #5014: re-enable blk-mq optimization
+
+ -- Proxmox Support Team <support@proxmox.com>  Sun, 15 Oct 2023 12:09:24 +0200
+
 zfs-linux (2.1.13-pve1) bookworm; urgency=medium
 
   * update ZFS to 2.1.13
