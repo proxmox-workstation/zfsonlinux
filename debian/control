@@ -151,6 +151,7 @@ Section: contrib/doc
 Architecture: all
 Depends:
  ${sphinxdoc:Depends},
+ ${sphinxdoc:Built-Using},
  ${misc:Depends}
 Recommends:
  python3-pyzfs
@@ -202,7 +203,7 @@ Description: OpenZFS root filesystem capabilities for Linux - dracut
 Package: zfsutils-linux
 Section: contrib/admin
 Architecture: linux-any
-Depends: python3, ${misc:Depends}, ${python3:Depends}, ${shlibs:Depends}
+Depends: python3, ${misc:Depends}, ${shlibs:Depends}
 Recommends: zfs-zed
 Suggests: nfs-kernel-server,
           samba-common-bin (>= 3.0.23),
