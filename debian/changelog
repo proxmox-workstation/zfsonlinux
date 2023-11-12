@@ -1,3 +1,13 @@
+zfs-linux (2.2.0-pve2) bookworm; urgency=medium
+
+  * avoid error from zfs-mount when /etc/exports.d does not exist (yet)
+
+  * ensure vdev_stat struct layout compat between 2.1 and 2.2, avoiding
+    false-positive detection of the non-allocating feature from 2.2 when the
+    kernel still used the 2.1 module.
+
+ -- Proxmox Support Team <support@proxmox.com>  Sun, 12 Nov 2023 16:02:02 +0100
+
 zfs-linux (2.2.0-pve1) bookworm; urgency=medium
 
   * update ZFS to 2.2.0
