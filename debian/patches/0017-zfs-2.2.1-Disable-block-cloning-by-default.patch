@@ -1,0 +1,42 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Tony Hutter <hutter2@llnl.gov>
+Date: Thu, 16 Nov 2023 11:42:19 -0800
+Subject: [PATCH] zfs-2.2.1: Disable block cloning by default
+
+Disable block cloning by default to mitigate possible data corruption
+(see #15529 and #15526).
+
+Signed-off-by: Tony Hutter <hutter2@llnl.gov>
+(cherry picked from commit 479dca51c66a731e637bd2d4f9bba01a05f9ac9f)
+Signed-off-by: Stoiko Ivanov <s.ivanov@proxmox.com>
+---
+ module/os/freebsd/zfs/zfs_vfsops.c   | 2 +-
+ module/os/linux/zfs/zpl_file_range.c | 2 +-
+ 2 files changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/module/os/freebsd/zfs/zfs_vfsops.c b/module/os/freebsd/zfs/zfs_vfsops.c
+index 09e18de81..0ac670ed9 100644
+--- a/module/os/freebsd/zfs/zfs_vfsops.c
++++ b/module/os/freebsd/zfs/zfs_vfsops.c
+@@ -89,7 +89,7 @@ int zfs_debug_level;
+ SYSCTL_INT(_vfs_zfs, OID_AUTO, debug, CTLFLAG_RWTUN, &zfs_debug_level, 0,
+ 	"Debug level");
+ 
+-int zfs_bclone_enabled = 1;
++int zfs_bclone_enabled = 0;
+ SYSCTL_INT(_vfs_zfs, OID_AUTO, bclone_enabled, CTLFLAG_RWTUN,
+ 	&zfs_bclone_enabled, 0, "Enable block cloning");
+ 
+diff --git a/module/os/linux/zfs/zpl_file_range.c b/module/os/linux/zfs/zpl_file_range.c
+index 73476ff40..139c51cf4 100644
+--- a/module/os/linux/zfs/zpl_file_range.c
++++ b/module/os/linux/zfs/zpl_file_range.c
+@@ -31,7 +31,7 @@
+ #include <sys/zfs_vnops.h>
+ #include <sys/zfeature.h>
+ 
+-int zfs_bclone_enabled = 1;
++int zfs_bclone_enabled = 0;
+ 
+ /*
+  * Clone part of a file via block cloning.

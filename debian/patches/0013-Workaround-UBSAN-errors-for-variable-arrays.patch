@@ -1,4 +1,4 @@
-From 28be24aefc13b11e4c96e172cf2685994e03150d Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Tony Hutter <hutter2@llnl.gov>
 Date: Thu, 9 Nov 2023 16:43:35 -0800
 Subject: [PATCH] Workaround UBSAN errors for variable arrays
@@ -70,6 +70,3 @@ index c13217159..b9c284a24 100644
  # Suppress incorrect warnings from versions of objtool which are not
  # aware of x86 EVEX prefix instructions used for AVX512.
  OBJECT_FILES_NON_STANDARD_vdev_raidz_math_avx512bw.o := y
--- 
-2.39.2
-

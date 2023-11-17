@@ -12,3 +12,6 @@
 0012-Fix-nfs_truncate_shares-without-etc-exports.d.patch
 0013-Workaround-UBSAN-errors-for-variable-arrays.patch
 0014-zpool-status-tighten-bounds-for-noalloc-stat-availab.patch
+0015-Fix-block-cloning-between-unencrypted-and-encrypted-.patch
+0016-Add-a-tunable-to-disable-BRT-support.patch
+0017-zfs-2.2.1-Disable-block-cloning-by-default.patch

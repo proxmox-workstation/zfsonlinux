@@ -1,0 +1,44 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Martin=20Matu=C5=A1ka?= <mm@FreeBSD.org>
+Date: Tue, 31 Oct 2023 21:49:41 +0100
+Subject: [PATCH] Fix block cloning between unencrypted and encrypted datasets
+
+Block cloning from an encrypted dataset into an unencrypted dataset
+and vice versa is not possible. The current code did allow cloning
+unencrypted files into an encrypted dataset causing a panic when
+these were accessed. Block cloning between encrypted and encrypted
+is currently supported on the same filesystem only.
+
+Reviewed-by: Alexander Motin <mav@FreeBSD.org>
+Reviewed-by: Kay Pedersen <mail@mkwg.de>
+Reviewed-by: Rob N <robn@despairlabs.com>
+Reviewed-by: Brian Behlendorf <behlendorf1@llnl.gov>
+Signed-off-by: Martin Matuska <mm@FreeBSD.org>
+Closes #15464
+Closes #15465
+(cherry picked from commit 459c99ff2339a4a514abcf2255f9b3e5324ef09e)
+Signed-off-by: Stoiko Ivanov <s.ivanov@proxmox.com>
+---
+ module/zfs/zfs_vnops.c | 9 +++++++++
+ 1 file changed, 9 insertions(+)
+
+diff --git a/module/zfs/zfs_vnops.c b/module/zfs/zfs_vnops.c
+index 40d6c87a7..84e6b10ef 100644
+--- a/module/zfs/zfs_vnops.c
++++ b/module/zfs/zfs_vnops.c
+@@ -1094,6 +1094,15 @@ zfs_clone_range(znode_t *inzp, uint64_t *inoffp, znode_t *outzp,
+ 
+ 	ASSERT(!outzfsvfs->z_replay);
+ 
++	/*
++	 * Block cloning from an unencrypted dataset into an encrypted
++	 * dataset and vice versa is not supported.
++	 */
++	if (inos->os_encrypted != outos->os_encrypted) {
++		zfs_exit_two(inzfsvfs, outzfsvfs, FTAG);
++		return (SET_ERROR(EXDEV));
++	}
++
+ 	error = zfs_verify_zp(inzp);
+ 	if (error == 0)
+ 		error = zfs_verify_zp(outzp);
