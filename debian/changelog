@@ -1,3 +1,10 @@
+zfs-linux (2.2.0-pve4) bookworm; urgency=medium
+
+  * pick bug-fix staged for 2.2.2:
+    - fix (rare) corruption caused by dirty dnode being treated as clean
+
+ -- Proxmox Support Team <support@proxmox.com>  Wed, 29 Nov 2023 09:21:26 +0100
+
 zfs-linux (2.2.0-pve3) bookworm; urgency=medium
 
   * pick bug-fixes staged for 2.2.1:
