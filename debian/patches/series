@@ -7,12 +7,5 @@
 0007-Add-systemd-unit-for-importing-specific-pools.patch
 0008-Patch-move-manpage-arcstat-1-to-arcstat-8.patch
 0009-arc-stat-summary-guard-access-to-l2arc-MFU-MRU-stats.patch
-0010-zvol-Remove-broken-blk-mq-optimization.patch
-0011-Revert-zvol-Temporally-disable-blk-mq.patch
-0012-Fix-nfs_truncate_shares-without-etc-exports.d.patch
-0013-Workaround-UBSAN-errors-for-variable-arrays.patch
-0014-zpool-status-tighten-bounds-for-noalloc-stat-availab.patch
-0015-Fix-block-cloning-between-unencrypted-and-encrypted-.patch
-0016-Add-a-tunable-to-disable-BRT-support.patch
-0017-zfs-2.2.1-Disable-block-cloning-by-default.patch
-0018-dnode_is_dirty-check-dnode-and-its-data-for-dirtines.patch
+0010-Fix-nfs_truncate_shares-without-etc-exports.d.patch
+0011-zpool-status-tighten-bounds-for-noalloc-stat-availab.patch
