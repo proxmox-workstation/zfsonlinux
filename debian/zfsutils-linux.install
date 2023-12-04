@@ -35,6 +35,7 @@ sbin/zstreamdump
 usr/bin/zvol_wait
 usr/bin/zilstat
 usr/lib/modules-load.d/ lib/
+usr/lib/zfs-linux/zfs_prepare_disk
 usr/lib/zfs-linux/zpool.d/
 usr/lib/zfs-linux/zpool_influxdb
 usr/sbin/arc_summary
@@ -72,6 +73,7 @@ usr/share/man/man8/zfs-list.8
 usr/share/man/man8/zfs-load-key.8
 usr/share/man/man8/zfs-mount-generator.8
 usr/share/man/man8/zfs-mount.8
+usr/share/man/man8/zfs_prepare_disk.8
 usr/share/man/man8/zfs-program.8
 usr/share/man/man8/zfs-project.8
 usr/share/man/man8/zfs-projectspace.8
