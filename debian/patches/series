@@ -9,4 +9,3 @@
 0009-arc-stat-summary-guard-access-to-l2arc-MFU-MRU-stats.patch
 0010-Fix-nfs_truncate_shares-without-etc-exports.d.patch
 0011-zpool-status-tighten-bounds-for-noalloc-stat-availab.patch
-0012-fix-mount-do-not-truncate-shares-not-zfs-mount.patch
