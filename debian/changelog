@@ -1,3 +1,11 @@
+zfs-linux (2.2.3-pve1) bookworm; urgency=medium
+
+  * update to new ZFS upstream 2.2.3 release
+
+  * fix #5288: correctly handle zvols with more than 15 partitions in udev
+
+ -- Proxmox Support Team <support@proxmox.com>  Mon, 11 Mar 2024 13:42:50 +0100
+
 zfs-linux (2.2.2-pve2) bookworm; urgency=medium
 
   * fix #5101: ensure datasets that have sharenfs enabled are not unexported
