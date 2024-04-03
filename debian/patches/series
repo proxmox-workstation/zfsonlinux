@@ -10,3 +10,16 @@
 0010-Fix-nfs_truncate_shares-without-etc-exports.d.patch
 0011-zpool-status-tighten-bounds-for-noalloc-stat-availab.patch
 0012-udev-correctly-handle-partition-16-and-later.patch
+0013-Linux-6.8-compat-use-splice_copy_file_range-for-fall.patch
+0014-linux-5.4-compat-page_size.patch
+0015-abd-add-page-iterator.patch
+0016-vdev_disk-rename-existing-functions-to-vdev_classic_.patch
+0017-vdev_disk-reorganise-vdev_disk_io_start.patch
+0018-vdev_disk-make-read-write-IO-function-configurable.patch
+0019-vdev_disk-rewrite-BIO-filling-machinery-to-avoid-spl.patch
+0020-vdev_disk-add-module-parameter-to-select-BIO-submiss.patch
+0021-vdev_disk-use-bio_chain-to-submit-multiple-BIOs.patch
+0022-abd_iter_page-don-t-use-compound-heads-on-Linux-4.5.patch
+0023-vdev_disk-default-to-classic-submission-for-2.2.x.patch
+0024-Fix-corruption-caused-by-mmap-flushing-problems.patch
+0025-vdev_disk-don-t-touch-vbio-after-its-handed-off-to-t.patch
