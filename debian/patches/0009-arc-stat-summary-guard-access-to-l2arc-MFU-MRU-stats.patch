@@ -27,7 +27,7 @@ Signed-off-by: Thomas Lamprecht <t.lamprecht@proxmox.com>
  2 files changed, 21 insertions(+), 21 deletions(-)
 
 diff --git a/cmd/arc_summary b/cmd/arc_summary
-index 9c69ec4f8..edf94ea2a 100755
+index 100fb1987..86b2260a1 100755
 --- a/cmd/arc_summary
 +++ b/cmd/arc_summary
 @@ -655,13 +655,13 @@ def section_arc(kstats_dict):
@@ -48,7 +48,7 @@ index 9c69ec4f8..edf94ea2a 100755
      prt_i1('L2 ineligible evictions:',
             f_bytes(arc_stats['evict_l2_ineligible']))
      print()
-@@ -851,20 +851,20 @@ def section_l2arc(kstats_dict):
+@@ -860,20 +860,20 @@ def section_l2arc(kstats_dict):
             f_perc(arc_stats['l2_hdr_size'], arc_stats['l2_size']),
             f_bytes(arc_stats['l2_hdr_size']))
      prt_i2('MFU allocated size:',
@@ -80,10 +80,10 @@ index 9c69ec4f8..edf94ea2a 100755
      print()
      prt_1('L2ARC breakdown:', f_hits(l2_access_total))
 diff --git a/cmd/arcstat.in b/cmd/arcstat.in
-index 8df1c62f7..833348d0e 100755
+index c4f10a1d6..c570dca88 100755
 --- a/cmd/arcstat.in
 +++ b/cmd/arcstat.in
-@@ -565,8 +565,8 @@ def calculate():
+@@ -597,8 +597,8 @@ def calculate():
      v["el2skip"] = d["evict_l2_skip"] // sint
      v["el2cach"] = d["evict_l2_cached"] // sint
      v["el2el"] = d["evict_l2_eligible"] // sint
@@ -93,8 +93,8 @@ index 8df1c62f7..833348d0e 100755
 +    v["el2mru"] = d.get("evict_l2_eligible_mru", 0) // sint
      v["el2inel"] = d["evict_l2_ineligible"] // sint
      v["mtxmis"] = d["mutex_miss"] // sint
- 
-@@ -581,11 +581,11 @@ def calculate():
+     v["ztotal"] = (d["zfetch_hits"] + d["zfetch_future"] + d["zfetch_stride"] +
+@@ -624,11 +624,11 @@ def calculate():
          v["l2size"] = cur["l2_size"]
          v["l2bytes"] = d["l2_read_bytes"] // sint
  
