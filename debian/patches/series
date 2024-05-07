@@ -6,6 +6,6 @@
 0006-dont-symlink-zed-scripts.patch
 0007-Add-systemd-unit-for-importing-specific-pools.patch
 0008-Patch-move-manpage-arcstat-1-to-arcstat-8.patch
-0009-arc-stat-summary-guard-access-to-l2arc-MFU-MRU-stats.patch
+0009-arc-stat-summary-guard-access-to-freshly-introduced-.patch
 0010-Fix-nfs_truncate_shares-without-etc-exports.d.patch
 0011-zpool-status-tighten-bounds-for-noalloc-stat-availab.patch
