@@ -9,3 +9,6 @@
 0009-arc-stat-summary-guard-access-to-freshly-introduced-.patch
 0010-Fix-nfs_truncate_shares-without-etc-exports.d.patch
 0011-zpool-status-tighten-bounds-for-noalloc-stat-availab.patch
+0012-Linux-6.10-compat-Fix-tracepoints-definitions.patch
+0013-zfs_log-add-flex-array-fields-to-log-record-structs.patch
+0014-lua-add-flex-array-field-to-TString-type.patch

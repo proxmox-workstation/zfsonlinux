@@ -1,0 +1,229 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Pavel Snajdr <snajpa@snajpa.net>
+Date: Tue, 17 Sep 2024 22:38:02 +0200
+Subject: [PATCH] Linux 6.10 compat: Fix tracepoints definitions
+
+__string field definition includes the source variable for a value
+of the string when the TP hits; in 6.10+ kernels, __assign_str()
+uses that to copy a value from src to the string, with older
+kernels, __assign_str still accepted src as a second parameter.
+
+Reviewed-by: Brian Behlendorf <behlendorf1@llnl.gov>
+Signed-off-by: Pavel Snajdr <snajpa@snajpa.net>
+Co-authored-by: Tony Hutter <hutter2@llnl.gov>
+Closes #16475
+Closes #16515
+Signed-off-by: Thomas Lamprecht <t.lamprecht@proxmox.com>
+---
+ config/kernel-assign_str.m4             | 62 +++++++++++++++++++++++++
+ config/kernel.m4                        |  1 +
+ include/os/linux/spl/sys/types.h        |  6 +++
+ include/os/linux/zfs/sys/trace_dbgmsg.h |  3 +-
+ include/os/linux/zfs/sys/trace_dbuf.h   | 29 +++++-------
+ 5 files changed, 82 insertions(+), 19 deletions(-)
+ create mode 100644 config/kernel-assign_str.m4
+
+diff --git a/config/kernel-assign_str.m4 b/config/kernel-assign_str.m4
+new file mode 100644
+index 000000000..cf4b00e7c
+--- /dev/null
++++ b/config/kernel-assign_str.m4
+@@ -0,0 +1,62 @@
++dnl #
++dnl # 6.10 kernel, check number of args of __assign_str() for trace:
++dnl
++dnl # 6.10+:           one arg
++dnl # 6.9 and older:   two args
++dnl #
++dnl # More specifically, this will test to see if __assign_str() takes one
++dnl # arg.  If __assign_str() takes two args, or is not defined, then
++dnl # HAVE_1ARG_ASSIGN_STR will not be set.
++dnl #
++AC_DEFUN([ZFS_AC_KERNEL_1ARG_ASSIGN_STR], [
++       AC_MSG_CHECKING([whether __assign_str() has one arg])
++       ZFS_LINUX_TRY_COMPILE_HEADER([
++               #include <linux/module.h>
++               MODULE_LICENSE("$ZFS_META_LICENSE");
++
++               #define CREATE_TRACE_POINTS
++               #include "conftest.h"
++       ],[
++               trace_zfs_autoconf_event_one("1");
++               trace_zfs_autoconf_event_two("2");
++       ],[
++               AC_MSG_RESULT(yes)
++               AC_DEFINE(HAVE_1ARG_ASSIGN_STR, 1,
++                   [__assign_str() has one arg])
++       ],[
++               AC_MSG_RESULT(no)
++       ],[
++               #if !defined(_CONFTEST_H) || defined(TRACE_HEADER_MULTI_READ)
++               #define _CONFTEST_H
++
++               #undef  TRACE_SYSTEM
++               #define TRACE_SYSTEM zfs
++               #include <linux/tracepoint.h>
++
++               DECLARE_EVENT_CLASS(zfs_autoconf_event_class,
++                       TP_PROTO(char *string),
++                       TP_ARGS(string),
++                       TP_STRUCT__entry(
++                               __string(str, string)
++                       ),
++                       TP_fast_assign(
++                               __assign_str(str);
++                       ),
++                       TP_printk("str = %s", __get_str(str))
++               );
++
++               #define DEFINE_AUTOCONF_EVENT(name) \
++               DEFINE_EVENT(zfs_autoconf_event_class, name, \
++                       TP_PROTO(char * str), \
++                       TP_ARGS(str))
++               DEFINE_AUTOCONF_EVENT(zfs_autoconf_event_one);
++               DEFINE_AUTOCONF_EVENT(zfs_autoconf_event_two);
++
++               #endif /* _CONFTEST_H */
++
++               #undef  TRACE_INCLUDE_PATH
++               #define TRACE_INCLUDE_PATH .
++               #define TRACE_INCLUDE_FILE conftest
++               #include <trace/define_trace.h>
++       ])
++])
+diff --git a/config/kernel.m4 b/config/kernel.m4
+index f0cd76fd7..17d8694ce 100644
+--- a/config/kernel.m4
++++ b/config/kernel.m4
+@@ -326,6 +326,7 @@ AC_DEFUN([ZFS_AC_KERNEL_TEST_RESULT], [
+ 	ZFS_AC_KERNEL_SYNC_BDEV
+ 	ZFS_AC_KERNEL_MM_PAGE_SIZE
+ 	ZFS_AC_KERNEL_MM_PAGE_MAPPING
++	ZFS_AC_KERNEL_1ARG_ASSIGN_STR
+ 	case "$host_cpu" in
+ 		powerpc*)
+ 			ZFS_AC_KERNEL_CPU_HAS_FEATURE
+diff --git a/include/os/linux/spl/sys/types.h b/include/os/linux/spl/sys/types.h
+index 94ba7b6ad..d3aefb184 100644
+--- a/include/os/linux/spl/sys/types.h
++++ b/include/os/linux/spl/sys/types.h
+@@ -83,4 +83,10 @@ typedef struct user_namespace	zidmap_t;
+ 
+ extern zidmap_t *zfs_init_idmap;
+ 
++#ifdef HAVE_1ARG_ASSIGN_STR
++#define	__assign_str_impl(a, b)		__assign_str(a)
++#else
++#define	__assign_str_impl(a, b)		__assign_str(a, b)
++#endif
++
+ #endif	/* _SPL_TYPES_H */
+diff --git a/include/os/linux/zfs/sys/trace_dbgmsg.h b/include/os/linux/zfs/sys/trace_dbgmsg.h
+index 19f533baa..58081d64c 100644
+--- a/include/os/linux/zfs/sys/trace_dbgmsg.h
++++ b/include/os/linux/zfs/sys/trace_dbgmsg.h
+@@ -32,6 +32,7 @@
+ #define	_TRACE_DBGMSG_H
+ 
+ #include <linux/tracepoint.h>
++#include <sys/types.h>
+ 
+ /*
+  * This file defines tracepoint events for use by the dbgmsg(),
+@@ -59,7 +60,7 @@ DECLARE_EVENT_CLASS(zfs_dprintf_class,
+ 	    __string(msg, msg)
+ 	),
+ 	TP_fast_assign(
+-	    __assign_str(msg, msg);
++	    __assign_str_impl(msg, msg);
+ 	),
+ 	TP_printk("%s", __get_str(msg))
+ );
+diff --git a/include/os/linux/zfs/sys/trace_dbuf.h b/include/os/linux/zfs/sys/trace_dbuf.h
+index 0e9cbdd72..b61807744 100644
+--- a/include/os/linux/zfs/sys/trace_dbuf.h
++++ b/include/os/linux/zfs/sys/trace_dbuf.h
+@@ -45,9 +45,13 @@
+  *     dmu_buf_impl_t *, ...,
+  *     zio_t *, ...);
+  */
++#define	DBUF_TP_STRUCT_ENTRY_OS_SPA \
++	    (db != NULL && \
++		POINTER_IS_VALID(DB_DNODE(db)->dn_objset)) \
++	    ? spa_name(DB_DNODE(db)->dn_objset->os_spa) : "NULL"
+ 
+ #define	DBUF_TP_STRUCT_ENTRY					\
+-	__dynamic_array(char,	os_spa,	TRACE_DBUF_MSG_MAX)	\
++	__string(os_spa, DBUF_TP_STRUCT_ENTRY_OS_SPA)		\
+ 	__field(uint64_t,	ds_object)			\
+ 	__field(uint64_t,	db_object)			\
+ 	__field(uint64_t,	db_level)			\
+@@ -55,18 +59,11 @@
+ 	__field(uint64_t,	db_offset)			\
+ 	__field(uint64_t,	db_size)			\
+ 	__field(uint64_t,	db_state)			\
+-	__field(int64_t,	db_holds)			\
+-	__dynamic_array(char,	msg,	TRACE_DBUF_MSG_MAX)
++	__field(int64_t,	db_holds)
+ 
+ #define	DBUF_TP_FAST_ASSIGN						\
+ 	if (db != NULL) {						\
+-		if (POINTER_IS_VALID(DB_DNODE(db)->dn_objset)) {	\
+-			__assign_str(os_spa,				\
+-			spa_name(DB_DNODE(db)->dn_objset->os_spa));	\
+-		} else {						\
+-			__assign_str(os_spa, "NULL");			\
+-		}							\
+-									\
++		__assign_str_impl(os_spa, DBUF_TP_STRUCT_ENTRY_OS_SPA); \
+ 		__entry->ds_object = db->db_objset->os_dsl_dataset ?	\
+ 		db->db_objset->os_dsl_dataset->ds_object : 0;		\
+ 									\
+@@ -77,10 +74,8 @@
+ 		__entry->db_size   = db->db.db_size;			\
+ 		__entry->db_state  = db->db_state;			\
+ 		__entry->db_holds  = zfs_refcount_count(&db->db_holds);	\
+-		snprintf(__get_str(msg), TRACE_DBUF_MSG_MAX,		\
+-		    DBUF_TP_PRINTK_FMT, DBUF_TP_PRINTK_ARGS);		\
+ 	} else {							\
+-		__assign_str(os_spa, "NULL");				\
++		__assign_str_impl(os_spa, DBUF_TP_STRUCT_ENTRY_OS_SPA); \
+ 		__entry->ds_object = 0;					\
+ 		__entry->db_object = 0;					\
+ 		__entry->db_level  = 0;					\
+@@ -89,8 +84,6 @@
+ 		__entry->db_size   = 0;					\
+ 		__entry->db_state  = 0;					\
+ 		__entry->db_holds  = 0;					\
+-		snprintf(__get_str(msg), TRACE_DBUF_MSG_MAX,		\
+-		    "dbuf { NULL }");					\
+ 	}
+ 
+ #define	DBUF_TP_PRINTK_FMT						\
+@@ -109,7 +102,7 @@ DECLARE_EVENT_CLASS(zfs_dbuf_class,
+ 	TP_ARGS(db, zio),
+ 	TP_STRUCT__entry(DBUF_TP_STRUCT_ENTRY),
+ 	TP_fast_assign(DBUF_TP_FAST_ASSIGN),
+-	TP_printk("%s", __get_str(msg))
++	TP_printk(DBUF_TP_PRINTK_FMT, DBUF_TP_PRINTK_ARGS)
+ );
+ 
+ DECLARE_EVENT_CLASS(zfs_dbuf_state_class,
+@@ -117,7 +110,7 @@ DECLARE_EVENT_CLASS(zfs_dbuf_state_class,
+ 	TP_ARGS(db, why),
+ 	TP_STRUCT__entry(DBUF_TP_STRUCT_ENTRY),
+ 	TP_fast_assign(DBUF_TP_FAST_ASSIGN),
+-	TP_printk("%s", __get_str(msg))
++	TP_printk(DBUF_TP_PRINTK_FMT, DBUF_TP_PRINTK_ARGS)
+ );
+ /* END CSTYLED */
+ 
+@@ -139,7 +132,7 @@ DECLARE_EVENT_CLASS(zfs_dbuf_evict_one_class,
+ 	TP_ARGS(db, mls),
+ 	TP_STRUCT__entry(DBUF_TP_STRUCT_ENTRY),
+ 	TP_fast_assign(DBUF_TP_FAST_ASSIGN),
+-	TP_printk("%s", __get_str(msg))
++	TP_printk(DBUF_TP_PRINTK_FMT, DBUF_TP_PRINTK_ARGS)
+ );
+ /* END CSTYLED */
+ 

@@ -1,0 +1,103 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Rob Norris <robn@despairlabs.com>
+Date: Tue, 1 Oct 2024 03:30:03 +1000
+Subject: [PATCH] lua: add flex array field to TString type
+
+Linux 6.10+ with CONFIG_FORTIFY_SOURCE notices memcpy() accessing past
+the end of TString, because it has no indication that there there may be
+an additional allocation there.
+
+There's no appropriate upstream change for this (ancient) version of
+Lua, so this is the narrowest change I could come up with to add a flex
+array field to the end of TString to satisfy the check. It's loosely
+based on changes from lua/lua@ca41b43f and lua/lua@9514abc2.
+
+Sponsored-by: https://despairlabs.com/sponsor/
+Reviewed-by: Alexander Motin <mav@FreeBSD.org>
+Reviewed-by: Brian Behlendorf <behlendorf1@llnl.gov>
+Signed-off-by: Rob Norris <robn@despairlabs.com>
+Closes #16541
+Closes #16583
+Signed-off-by: Thomas Lamprecht <t.lamprecht@proxmox.com>
+---
+ module/lua/lobject.h | 21 ++++++++++++---------
+ module/lua/lstate.h  |  2 +-
+ module/lua/lstring.c |  2 +-
+ module/lua/lstring.h |  2 +-
+ 4 files changed, 15 insertions(+), 12 deletions(-)
+
+diff --git a/module/lua/lobject.h b/module/lua/lobject.h
+index b7c6b41ac..06fdcdcbc 100644
+--- a/module/lua/lobject.h
++++ b/module/lua/lobject.h
+@@ -404,19 +404,22 @@ typedef TValue *StkId;  /* index to stack elements */
+ /*
+ ** Header for string value; string bytes follow the end of this structure
+ */
+-typedef union TString {
+-  L_Umaxalign dummy;  /* ensures maximum alignment for strings */
+-  struct {
+-    CommonHeader;
+-    lu_byte extra;  /* reserved words for short strings; "has hash" for longs */
+-    unsigned int hash;
+-    size_t len;  /* number of characters in string */
+-  } tsv;
++typedef struct TString {
++  union {
++    L_Umaxalign dummy;  /* ensures maximum alignment for strings */
++    struct {
++      CommonHeader;
++      lu_byte extra;  /* reserved words for short strings; "has hash" for longs */
++      unsigned int hash;
++      size_t len;  /* number of characters in string */
++    } tsv;
++  };
++  char contents[];
+ } TString;
+ 
+ 
+ /* get the actual string (array of bytes) from a TString */
+-#define getstr(ts)	cast(const char *, (ts) + 1)
++#define getstr(ts)	((ts)->contents)
+ 
+ /* get the actual string (array of bytes) from a Lua value */
+ #define svalue(o)       getstr(rawtsvalue(o))
+diff --git a/module/lua/lstate.h b/module/lua/lstate.h
+index 75c6ceda6..c5fa59335 100644
+--- a/module/lua/lstate.h
++++ b/module/lua/lstate.h
+@@ -185,7 +185,7 @@ struct lua_State {
+ */
+ union GCObject {
+   GCheader gch;  /* common header */
+-  union TString ts;
++  struct TString ts;
+   union Udata u;
+   union Closure cl;
+   struct Table h;
+diff --git a/module/lua/lstring.c b/module/lua/lstring.c
+index 15a73116b..149a4ffc5 100644
+--- a/module/lua/lstring.c
++++ b/module/lua/lstring.c
+@@ -103,7 +103,7 @@ static TString *createstrobj (lua_State *L, const char *str, size_t l,
+   ts->tsv.len = l;
+   ts->tsv.hash = h;
+   ts->tsv.extra = 0;
+-  sbuf = (char *)(TString *)(ts + 1);
++  sbuf = ts->contents;
+   memcpy(sbuf, str, l*sizeof(char));
+   sbuf[l] = '\0';  /* ending 0 */
+   return ts;
+diff --git a/module/lua/lstring.h b/module/lua/lstring.h
+index 260e7f169..257b38417 100644
+--- a/module/lua/lstring.h
++++ b/module/lua/lstring.h
+@@ -12,7 +12,7 @@
+ #include "lstate.h"
+ 
+ 
+-#define sizestring(s)	(sizeof(union TString)+((s)->len+1)*sizeof(char))
++#define sizestring(s)	(sizeof(struct TString)+((s)->len+1)*sizeof(char))
+ 
+ #define sizeudata(u)	(sizeof(union Udata)+(u)->len)
+ 
