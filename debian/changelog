@@ -1,3 +1,9 @@
+zfs-linux (2.2.7-pve1) bookworm; urgency=medium
+
+  * update to new ZFS upstream 2.2.7 release
+
+ -- Proxmox Support Team <support@proxmox.com>  Fri, 17 Jan 2025 16:45:50 +0100
+
 zfs-linux (2.2.6-pve1) bookworm; urgency=medium
 
   * update to new ZFS upstream 2.2.6 release
