@@ -45,7 +45,7 @@ dsc:
 .PHONY: kernel
 kernel: $(ZFS_DSC)
 	dpkg-source -x $(ZFS_DSC) ../pkg-zfs
-	$(MAKE) -C ../pkg-zfs -f debian/rules adapt_meta_file
+	$(MAKE) -j$(nproc) -C ../pkg-zfs -f debian/rules adapt_meta_file
 
 .PHONY: dinstall
 dinstall: $(DEBS)
